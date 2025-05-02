@@ -1,11 +1,11 @@
 'use client';
 
-import { useStore } from '@/lib/store/useStore';
+import { userStore } from '@/lib/store/userStore';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 const Header = () => {
-  const { isLoggedIn, user, setUser } = useStore();
+  const { isLoggedIn, user, setUser } = userStore();
   const router = useRouter();
 
   // 로컬 스토리지에서 사용자 정보 확인

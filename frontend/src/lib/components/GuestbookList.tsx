@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { guestbookApi, likesApi } from '@/api/api';
 import { Guestbook } from '@/lib/types/guestbook';
-import { useStore } from '@/lib/store/useStore';
+import { userStore } from '@/lib/store/userStore';
 
 const GuestbookList = () => {
   const [guestbooks, setGuestbooks] = useState<Guestbook[]>([]);
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState('');
-  const { user } = useStore();
+  const { user } = userStore();
 
   useEffect(() => {
     fetchGuestbooks();

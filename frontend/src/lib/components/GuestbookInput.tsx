@@ -2,13 +2,13 @@
 
 import { FormEvent, useState } from 'react';
 import { guestbookApi } from '@/api/api';
-import { useStore } from '@/lib/store/useStore';
+import { userStore } from '@/lib/store/userStore';
 
 
 const GuestbookInput = () => {
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
-  const { user } = useStore();
+  const { user } = userStore();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
