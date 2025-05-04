@@ -1,6 +1,6 @@
-import GuestbookInput from "@/lib/components/GuestbookInput";
-import GuestbookList from "@/lib/components/GuestbookList";
-import Header from "@/lib/components/Header";
+import GuestbookInput from "@/lib/components/ui/GuestbookInput";
+import GuestbookList from "@/lib/components/ui/GuestbookList";
+import Header from "@/lib/components/ui/Header";
 
 export default function Home() {
 
