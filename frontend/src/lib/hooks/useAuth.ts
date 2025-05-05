@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { authApi } from '@/api/api';
+import { Alert } from '@/lib/components/ui/Alert';
 import { userStore } from '@/lib/store/userStore';
 import { signInSchema, signUpSchema, type SignInFormData, type SignUpFormData } from '@/lib/types/auth';
-import { Alert } from '@/lib/components/ui/Alert';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { ZodError } from 'zod';
 
 export function useAuth() {
