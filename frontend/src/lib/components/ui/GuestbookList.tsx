@@ -1,31 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { guestbookApi, likesApi } from '@/api/api';
-import { Guestbook } from '@/lib/types/guestbook';
+import { useDeleteGuestbookEntry, useGuestbookEntries, useToggleLike, useUpdateGuestbookEntry } from '@/lib/hooks/useGuestbook';
 import { userStore } from '@/lib/store/userStore';
+import { Guestbook } from '@/lib/types/guestbook';
+import { useState } from 'react';
+import { Alert } from './Alert';
+import LoadingSpinner from './LoadingSpinner';
 
 const GuestbookList = () => {
-  const [guestbooks, setGuestbooks] = useState<Guestbook[]>([]);
-  const [error, setError] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState('');
   const { user } = userStore();
 
-  useEffect(() => {
-    fetchGuestbooks();
-  }, []);
-
-  const fetchGuestbooks = async () => {
-    try {
-      const response = await guestbookApi.getGuestbooks();
-      const data = Array.isArray(response.data) ? response.data : [];
-      setGuestbooks(data);
-    } catch (err) {
-      setError('방명록을 불러오는데 실패했습니다.');
-      setGuestbooks([]);
-    }
-  };
+  const { data: guestbooks = [], isPending, error } = useGuestbookEntries();
+  const { mutate: updateEntry, isPending: isUpdating } = useUpdateGuestbookEntry();
+  const { mutate: deleteEntry, isPending: isDeleting } = useDeleteGuestbookEntry();
+  const { mutate: toggleLike, isPending: isLiking } = useToggleLike();
 
   const handleEdit = (guestbook: Guestbook) => {
     if (user?.id !== guestbook.user_id) return;
@@ -33,14 +23,19 @@ const GuestbookList = () => {
     setEditContent(guestbook.contents);
   };
 
-  const handleSaveEdit = async (id: number) => {
-    try {
-      await guestbookApi.updateGuestbook(id, { contents: editContent });
-      setEditingId(null);
-      fetchGuestbooks();
-    } catch (err) {
-      setError('방명록 수정에 실패했습니다.');
-    }
+  const handleSaveEdit = (id: number) => {
+    updateEntry(
+      { id, contents: editContent },
+      {
+        onSuccess: () => {
+          setEditingId(null);
+          Alert('방명록이 수정되었습니다.');
+        },
+        onError: () => {
+          Alert('방명록 수정에 실패했습니다.');
+        }
+      }
+    );
   };
 
   const handleCancelEdit = () => {
@@ -48,34 +43,51 @@ const GuestbookList = () => {
     setEditContent('');
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await guestbookApi.deleteGuestbook(id);
-      fetchGuestbooks();
-    } catch (err) {
-      setError('방명록 삭제에 실패했습니다.');
-    }
+  const handleDelete = (id: number) => {
+    if (!window.confirm('정말로 이 방명록을 삭제하시겠습니까?')) return;
+    
+    deleteEntry(id, {
+      onSuccess: () => {
+        Alert('방명록이 삭제되었습니다.');
+      },
+      onError: () => {
+        Alert('방명록 삭제에 실패했습니다.');
+      }
+    });
   };
 
-  const handleLike = async (id: number) => {
-    try {
-      await likesApi.updateLike(id);
-      fetchGuestbooks();
-    } catch (err) {
-      setError('좋아요 처리에 실패했습니다.');
+  const handleLike = (id: number, isLiked: boolean) => {
+    if (!user) {
+      Alert('로그인이 필요한 기능입니다.');
+      return;
     }
+    
+    toggleLike(
+      { id, isLiked },
+      {
+        onError: () => {
+          Alert('좋아요 처리에 실패했습니다.');
+        }
+      }
+    );
   };
+
+  if (isPending) {
+    return <div ><LoadingSpinner /></div>;
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        방명록을 불러오는데 실패했습니다.
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
       <div className="space-y-4">
-        {guestbooks && guestbooks.length > 0 ? (
+        {guestbooks.length > 0 ? (
           guestbooks.map((guestbook) => (
             <div
               key={guestbook.id}
@@ -91,17 +103,20 @@ const GuestbookList = () => {
                         onChange={(e) => setEditContent(e.target.value)}
                         className="w-full p-2 border rounded"
                         rows={3}
+                        disabled={isUpdating}
                       />
                       <div className="mt-2 flex gap-2">
                         <button
                           onClick={() => handleSaveEdit(guestbook.id)}
-                          className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                          className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
+                          disabled={isUpdating}
                         >
-                          저장
+                          {isUpdating ? '저장 중...' : '저장'}
                         </button>
                         <button
                           onClick={handleCancelEdit}
                           className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
+                          disabled={isUpdating}
                         >
                           취소
                         </button>
@@ -118,24 +133,27 @@ const GuestbookList = () => {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <button
-                    onClick={() => handleLike(guestbook.id)}
-                    className="text-red-600 hover:text-red-800"
+                    onClick={() => handleLike(guestbook.id, guestbook.liked_by_user)}
+                    className={`${guestbook.liked_by_user ? 'text-red-600' : 'text-gray-400'} hover:text-red-800 disabled:opacity-50`}
+                    disabled={isLiking}
                   >
-                    좋아요 ({guestbook.likes || 0})
+                    좋아요 ({guestbook.likes})
                   </button>
                   {user?.id === guestbook.user_id && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(guestbook)}
                         className="text-indigo-600 hover:text-indigo-800"
+                        disabled={isDeleting}
                       >
                         수정
                       </button>
                       <button
                         onClick={() => handleDelete(guestbook.id)}
                         className="text-red-600 hover:text-red-800"
+                        disabled={isDeleting}
                       >
-                        삭제
+                        {isDeleting ? '삭제 중...' : '삭제'}
                       </button>
                     </div>
                   )}

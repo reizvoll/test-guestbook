@@ -27,7 +27,19 @@ export default function RootLayout({
       <body className={pretendard.className}>
         <TQProvider>
           {children}
-          <ToastContainer />
+          <ToastContainer
+            position="bottom-center"
+            autoClose={3000}
+            hideProgressBar
+            newestOnTop={true}
+            closeOnClick
+            limit={1}
+            icon={false}
+            rtl={false}
+            pauseOnFocusLoss={false}
+            draggable={false}
+            pauseOnHover={false}
+          />
         </TQProvider>
       </body>
     </html>
