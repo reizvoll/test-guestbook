@@ -1,10 +1,10 @@
-import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import express from 'express';
+import authRoutes from './routes/auth';
+import contentsRoutes from './routes/contents';
 import guestbookRoutes from './routes/guestbook';
 import likesRoutes from './routes/likes';
-import contentsRoutes from './routes/contents';
-import authRoutes from './routes/auth';
 
 dotenv.config();
 
@@ -24,7 +24,7 @@ app.use(express.json());
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/guestbook', guestbookRoutes);
-app.use('/api/guestbook', likesRoutes);
+app.use('/api/likes', likesRoutes);
 app.use('/api/guestbook', contentsRoutes);
 
 app.listen(port, () => {
