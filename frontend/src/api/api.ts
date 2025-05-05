@@ -44,8 +44,8 @@ export const guestbookApi = {
 
 // 좋아요 관련 API
 export const likesApi = {
-  updateLike: (id: number) => API.put(`/api/guestbook/${id}/like`),
-  updateUnlike: (id: number) => API.put(`/api/guestbook/${id}/unlike`),
+  updateLike: (id: number, user_id: number) => API.put(`/api/likes/${id}`, { user_id, action: 'like' }),
+  updateUnlike: (id: number, user_id: number) => API.put(`/api/likes/${id}`, { user_id, action: 'unlike' }),
 };
 
 // 요청 인터셉터 - 토큰 추가
