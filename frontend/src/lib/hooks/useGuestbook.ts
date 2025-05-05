@@ -1,4 +1,5 @@
 import { guestbookApi, likesApi } from "@/api/api";
+import { userStore } from "@/lib/store/userStore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Guestbook } from "../types/guestbook";
 
@@ -41,8 +42,8 @@ export function useUpdateGuestbookEntry() {
       await queryClient.cancelQueries({ queryKey: ["guestbook"] });
       const prevEntries = queryClient.getQueryData<Guestbook[]>(["guestbook"]) || [];
 
-      queryClient.setQueryData(["guestbook"], (oldEntries: Guestbook[] = []) =>
-        oldEntries.map((entry) => 
+      queryClient.setQueryData(["guestbook"], 
+        prevEntries.map((entry) => 
           entry.id === updated.id ? { ...entry, contents: updated.contents } : entry
         )
       );
@@ -50,7 +51,7 @@ export function useUpdateGuestbookEntry() {
       return { prevEntries };
     },
     onError: (_err, _updated, context) => {
-      queryClient.setQueryData(["guestbook"], context?.prevEntries);
+      queryClient.setQueryData(["guestbook"], context?.prevEntries || []);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["guestbook"] });
@@ -70,15 +71,14 @@ export function useDeleteGuestbookEntry() {
       await queryClient.cancelQueries({ queryKey: ["guestbook"] });
       const prevEntries = queryClient.getQueryData<Guestbook[]>(["guestbook"]) || [];
 
-      queryClient.setQueryData(
-        ["guestbook"],
+      queryClient.setQueryData(["guestbook"], 
         prevEntries.filter((entry) => entry.id !== id)
       );
 
       return { prevEntries };
     },
     onError: (_err, _id, context) => {
-      queryClient.setQueryData(["guestbook"], context?.prevEntries);
+      queryClient.setQueryData(["guestbook"], context?.prevEntries || []);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["guestbook"] });
@@ -89,21 +89,27 @@ export function useDeleteGuestbookEntry() {
 // 좋아요 토글 훅
 export function useToggleLike() {
   const queryClient = useQueryClient();
+  const { user } = userStore();
 
   return useMutation({
     mutationFn: async ({ id, isLiked }: { id: number; isLiked: boolean }) => {
-      if (isLiked) {
-        await likesApi.updateUnlike(id);
-      } else {
-        await likesApi.updateLike(id);
+      if (!user?.id) {
+        throw new Error('로그인이 필요한 기능입니다.');
       }
+
+      const response = await (isLiked 
+        ? likesApi.updateUnlike(id, user.id)
+        : likesApi.updateLike(id, user.id)
+      );
+
+      return response.data;
     },
     onMutate: async ({ id, isLiked }) => {
       await queryClient.cancelQueries({ queryKey: ["guestbook"] });
       const prevEntries = queryClient.getQueryData<Guestbook[]>(["guestbook"]) || [];
 
-      queryClient.setQueryData(["guestbook"], (oldEntries: Guestbook[] = []) =>
-        oldEntries.map((entry) => 
+      queryClient.setQueryData(["guestbook"], 
+        prevEntries.map((entry) => 
           entry.id === id 
             ? { 
                 ...entry, 
@@ -116,8 +122,8 @@ export function useToggleLike() {
 
       return { prevEntries };
     },
-    onError: (_err, _variables, context) => {
-      queryClient.setQueryData(["guestbook"], context?.prevEntries);
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(["guestbook"], context?.prevEntries || []);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["guestbook"] });

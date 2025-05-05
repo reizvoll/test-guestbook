@@ -44,8 +44,22 @@ export const guestbookApi = {
 
 // 좋아요 관련 API
 export const likesApi = {
-  updateLike: (id: number) => API.put(`/api/guestbook/${id}/like`),
-  updateUnlike: (id: number) => API.put(`/api/guestbook/${id}/unlike`),
+  updateLike: (id: number, user_id: number) => 
+    API.put(`/api/likes/${id}`, { user_id, action: 'like' })
+      .then(response => {
+        if (response.status === 400) {
+          throw new Error('이미 좋아요를 누른 게시물입니다.');
+        }
+        return response;
+      }),
+  updateUnlike: (id: number, user_id: number) => 
+    API.put(`/api/likes/${id}`, { user_id, action: 'unlike' })
+      .then(response => {
+        if (response.status === 400) {
+          throw new Error('이미 좋아요를 취소한 게시물입니다.');
+        }
+        return response;
+      }),
 };
 
 // 요청 인터셉터 - 토큰 추가
