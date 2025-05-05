@@ -6,12 +6,26 @@ A full-stack guestbook application built with Next.js, Express, and PostgreSQL.
 
 ```
 .
-├── backend/          # Backend application (Express.js)
-│   ├── src/         # source code
-│   ├── package.json 
+├── backend/                  # Backend application (Express.js)
+│   ├── src/                  # Express source code (routes, controllers, models, etc.)
+│   ├── package.json
 │   └── tsconfig.json
-├── docker-compose.yml # Docker settings
-└── package.json
+│
+├── frontend/                 # Frontend application (Next.js)
+│   ├── app/                  # Next.js 13+ App Router
+│   │   ├── page.tsx         # Home page (guestbook)
+│   │   └── layout.tsx       # Global layout (e.g., header/footer)
+│   ├── components/           # Reusable UI components (e.g., Header, GuestbookCard)
+│   ├── store/                # Zustand or other state management files
+│   ├── api/                  # Axios or API service layer
+│   ├── types/                # Shared TypeScript types
+│   ├── styles/               # Global styles or Tailwind config (if used)
+│   ├── public/               # Static assets (e.g., images, favicon)
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── docker-compose.yml        # Docker settings
+└── package.json              # Root-level config (scripts, concurrently, etc.)
 ```
 
 ## Tech Stack
