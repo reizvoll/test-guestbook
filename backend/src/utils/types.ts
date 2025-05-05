@@ -16,17 +16,18 @@ export type GuestbookCreateBody = {
 // Auth 관련 타입
 export type RegisterBody = {
     id: string;
+    email: string;
     password: string;
     nickname: string;
 };
 
 export type LoginBody = {
-    id: string;
+    email: string;
     password: string;
 };
 
 export type ChangePasswordBody = {
-    id: string;
+    email: string;
     currentPassword: string;
     newPassword: string;
 };
@@ -37,7 +38,6 @@ export type ApiResponse<T = any> = {
     error?: string;
     user?: {
         id: number;
-        username: string;
         nickname: string;
     };
     token?: string;
