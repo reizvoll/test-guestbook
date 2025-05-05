@@ -1,5 +1,4 @@
 import { toast } from "react-toastify";
-// import AlertIcon from "@/assets/images/check-circle.svg";
 
 declare const window: Window &
     typeof globalThis & {

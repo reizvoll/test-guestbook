@@ -1,10 +1,10 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useState } from 'react';
 import { AuthForm } from '@/lib/components/auth/AuthForm';
 import { AuthInput } from '@/lib/components/auth/AuthInput';
-import { type SignUpFormData } from '@/lib/types/auth';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { type SignUpFormData } from '@/lib/types/auth';
+import { ChangeEvent, FormEvent, useState } from 'react';
 
 export default function SignUp() {
   const { error, handleSignUp } = useAuth();

@@ -1,5 +1,5 @@
-import { FormEvent, ReactNode } from 'react';
 import Link from 'next/link';
+import { FormEvent, ReactNode } from 'react';
 
 type AuthFormProps = {
   title: string;

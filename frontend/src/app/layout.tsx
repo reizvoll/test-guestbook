@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import TQProvider from "@/lib/providers/TQProvider";
 import "@/styles/globals.css";
+import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -24,8 +25,22 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={pretendard.className}>
-        {children}
-        <ToastContainer />
+        <TQProvider>
+          {children}
+          <ToastContainer
+            position="bottom-center"
+            autoClose={3000}
+            hideProgressBar
+            newestOnTop={true}
+            closeOnClick
+            limit={1}
+            icon={false}
+            rtl={false}
+            pauseOnFocusLoss={false}
+            draggable={false}
+            pauseOnHover={false}
+          />
+        </TQProvider>
       </body>
     </html>
   );
